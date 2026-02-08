@@ -25,7 +25,7 @@ interface DBStructure {
 }
 
 const server = express()
-const PORT = 5000
+const PORT = process.env.PORT || 5000;
 const DB_PATH = path.join(__dirname, 'db.json')
 
 server.use(cors())
@@ -180,6 +180,6 @@ server.delete('/api/posts/:postId/comments/:commentId', async (req: Request, res
     }
 });
 
-server.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}/api/posts`)
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
 });
