@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "CommonJS",            /* Для работы с ts-node на бэкенде лучше использовать CommonJS */
+    "moduleResolution": "node",
+    "esModuleInterop": true,         /* РЕШАЕТ ТВОЮ ОШИБКУ */
+    "skipLibCheck": true,            /* Игнорирует ошибки в папке node_modules */
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "rootDir": "..", 
+    "rootDirs": [".."],
+    "paths": {
+      "*": ["node_modules/*"]
+    }
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
