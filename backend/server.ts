@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express'
-import * as jsonServer from 'json-server'
 import cors from 'cors'
 import fs from 'fs/promises'
+import * as jsonServer from 'json-server'
 import path, { dirname } from 'path'
 import { Post, ForumComment, User } from '../src/components/types'
 interface PostDB {
