@@ -32,7 +32,7 @@ export const Sider: React.FC<SiderProp> = ({ isOpen, onClose, onThemeToggle, cur
                     ) : (
                         <>
                             <S.MenuItem
-                                as={NavLink} to={userAuth ? `/profile/${userAuth.id}` : '#'}
+                                as={NavLink} to={userAuth ? `/profile/${userAuth?.id}` : '#'}
                                 onClick={onClose}
                             >
                                 👤 Мій профіль

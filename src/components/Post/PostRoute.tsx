@@ -39,10 +39,10 @@ export const PostRoute: React.FC<RouteProp> = ({ posts, userAuth, onAddComment, 
             <S.PostTitle>{post.title}</S.PostTitle>
             <S.AuthorInfo>
                 <Link
-                    to={`/profile/${post.author.id}`}
+                    to={`/profile/${post.author?.id}`}
                     style={{ color: 'inherit', textDecoration: 'none', fontWeight: 'bold' }}
                 >
-                    {post.author.username}
+                    {post.author?.username}
                 </Link>
                 <span>{post.createdAt}</span>
             </S.AuthorInfo>
