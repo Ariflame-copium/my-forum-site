@@ -1,7 +1,8 @@
 import express, { Request, Response } from 'express'
+import * as jsonServer from 'json-server'
 import cors from 'cors'
 import fs from 'fs/promises'
-import path from 'path'
+import path, { dirname } from 'path'
 import { Post, ForumComment, User } from '../src/components/types'
 interface PostDB {
     id: number;
@@ -25,11 +26,15 @@ interface DBStructure {
 }
 
 const server = express()
+const router = jsonServer.router(path.join(__dirname, 'db.json'))
+const middlewares = jsonServer.defaults()
 const PORT = Number(process.env.PORT) || 5000;
 const DB_PATH = path.join(__dirname, 'db.json')
 
 server.use(cors())
+server.use(middlewares)
 server.use(express.json())
+server.use('/api', router)
 
 async function readDB(): Promise<DBStructure> {
     try {
