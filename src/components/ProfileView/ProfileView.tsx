@@ -19,8 +19,9 @@ export const ProfileView: React.FC = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState('');
     const [editAvatar, setEditAvatar] = useState('');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
-        fetch(`http://localhost:5000/api/users/${userId}`)
+        fetch(`${API_URL}/api/users/${userId}`)
             .then(res => res.json())
             .then(data => {
                 setUserData(data);
@@ -77,7 +78,7 @@ export const ProfileView: React.FC = () => {
             requesterId: currentUser.id
         }
         try {
-            const response = await fetch(`http://localhost:5000/api/users/${userId}`, {
+            const response = await fetch(`${API_URL}/api/users/${userId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

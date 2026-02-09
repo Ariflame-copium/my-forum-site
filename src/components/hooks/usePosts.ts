@@ -4,8 +4,9 @@ import type { ForumComment } from "../types";
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
-        fetch('http://localhost:5000/api/posts')
+        fetch(`${API_URL}/api/posts`)
             .then(res => res.json())
             .then(data => {
                 setPosts(data);
@@ -16,7 +17,7 @@ export const usePosts = () => {
 
     const addPost = async (newPost: Omit<Post, 'id' | 'createdAt' | 'comments'>) => {
         try {
-            const response = await fetch('http://localhost:5000/api/posts', {
+            const response = await fetch(`${API_URL}/api/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newPost)
@@ -30,7 +31,7 @@ export const usePosts = () => {
 
     const allComment = posts.flatMap(p => p.comments || []);
     const deleteReply = async (postId: number, commentId: number) => {
-        const response = await fetch(`http://localhost:5000/api/posts/${postId}/comments/${commentId}`, {
+        const response = await fetch(`${API_URL}/api/posts/${postId}/comments/${commentId}`, {
             method: 'DELETE'
         });
         if (response.ok) {
@@ -47,7 +48,7 @@ export const usePosts = () => {
     };
     const deleteComment = async (postId: number) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+            const response = await fetch(`${API_URL}/api/posts/${postId}`, {
                 method: 'DELETE'
             })
             if (response.ok) {
@@ -60,7 +61,7 @@ export const usePosts = () => {
     }
     const addComment = async (postId: number, comment: Omit<ForumComment, 'id' | 'createdAt'>) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/posts/${postId}/comments`, {
+            const response = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(comment)
