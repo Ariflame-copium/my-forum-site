@@ -13,7 +13,7 @@ import { Modal } from './Modal'
 import { PostRoute } from './Post/PostRoute'
 import { MessagesView } from './ProfileView/MessagesView'
 export const AppSection: React.FC = () => {
-    const { state, actions, currentUser } = useAppLogic();
+    const { state, actions, currentUser } = useAppLogic(); //лагодимо юрл для працюючого серверу
     return (
         <BrowserRouter>
             <ThemeProvider theme={state.theme === 'light' ? lightTheme : darkTheme}>
