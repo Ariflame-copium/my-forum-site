@@ -25,7 +25,7 @@ interface DBStructure {
 }
 
 const server = express()
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const DB_PATH = path.join(__dirname, 'db.json')
 
 server.use(cors())
