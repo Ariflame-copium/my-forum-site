@@ -130,7 +130,7 @@ server.post('/api/posts/:id/comments', async (req: Request, res: Response) => {
 });
 
 
-server.patch('/api/users/:id', async (req, res) => {
+server.patch('/api/users/:id', async (req: Request, res: Response) => {
     const targetId = Number(req.params.id);
     const { profilePicUrl, username, requesterId } = req.body;
     if (targetId !== Number(requesterId)) {
