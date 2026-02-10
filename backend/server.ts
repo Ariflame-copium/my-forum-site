@@ -1,88 +1,104 @@
 import express, { Request, Response } from 'express'
 import cors from 'cors'
-import fs from 'fs/promises'
-import * as jsonServer from 'json-server'
-import path, { dirname } from 'path'
-import { Post, ForumComment, User } from '../src/components/types'
-interface PostDB {
+import mongoose from 'mongoose'
+export type UserRole = 'student' | 'teacher' | 'admin';
+
+export interface User {
+    id: number;
+    username: string;
+    profilePicUrl: string;
+    role: UserRole;
+    email?: string;
+    password?: string;
+}
+
+export interface ForumComment {
+    id: number;
+    postid: number;
+    author: User;
+    text: string;
+    createdAt: string;
+    replies: ForumComment[];
+}
+
+export interface Post {
     id: number;
     title: string;
-    authorId: number;
+    author: User;
     content: string[];
-    createdAt: string;
-    comments: ForumCommentDB[];
-}
-
-interface ForumCommentDB {
-    id: number;
-    text: string;
-    authorId: number;
+    comments: ForumComment[];
     createdAt: string;
 }
 
-interface DBStructure {
-    posts: PostDB[];
-    users: User[];
-}
-
-const server = express()
-const router = jsonServer.router(path.join(__dirname, 'db.json'))
-const middlewares = jsonServer.defaults()
+const server = express();
 const PORT = Number(process.env.PORT) || 5000;
-const DB_PATH = path.join(__dirname, 'db.json')
 
-server.use(cors())
-server.use(middlewares)
-server.use(express.json())
-server.use('/api', router)
+server.use(cors());
+server.use(express.json({ limit: '50mb' }));
+server.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-async function readDB(): Promise<DBStructure> {
-    try {
-        const data = await fs.readFile(DB_PATH, 'utf-8');
-        const db = JSON.parse(data);
-        return {
-            posts: db.posts || [],
-            users: db.users || []
-        };
-    } catch (error) {
-        return { posts: [], users: [] };
-    }
-}
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://ariflame:p6hV03LktWY66yfw@dbbackend0.uwwvylh.mongodb.net/?appName=DBbackend0";
 
-async function writeDB(db: DBStructure): Promise<void> {
-    console.log("Спроба запису в БД за шляхом:", DB_PATH);
-    await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
-    console.log("Дані успішно збережено!");
-}
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('✅ Connected to MongoDB Atlas'))
+    .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-server.use(express.json({
-    limit: '50mb',
-    strict: false
-}));
+const UserSchema = new mongoose.Schema<User>({
+    id: { type: Number, required: true, unique: true },
+    username: { type: String, required: true },
+    profilePicUrl: { type: String, default: "" },
+    role: { type: String, default: 'student' },
+    email: String,
+    password: { type: String, required: true }
+});
 
-server.use(express.urlencoded({
-    limit: '50mb',
-    extended: true,
-    parameterLimit: 50000
-}));
+const PostSchema = new mongoose.Schema({
+    id: { type: Number, required: true, unique: true },
+    title: { type: String, required: true },
+    authorId: { type: Number, required: true },
+    content: [String],
+    createdAt: { type: String, default: () => new Date().toLocaleString() },
+    comments: [{
+        id: Number,
+        text: String,
+        authorId: Number,
+        createdAt: { type: String, default: () => new Date().toLocaleString() }
+    }]
+});
+
+const UserModel = mongoose.model<User>('User', UserSchema);
+const PostModel = mongoose.model('Post', PostSchema);
+
 server.get('/api/posts', async (req: Request, res: Response) => {
     try {
-        const db = await readDB();
+        const [rawPosts, users] = await Promise.all([
+            PostModel.find().lean(),
+            UserModel.find().lean()
+        ]);
 
-        const enrichedPosts = db.posts.map((post: PostDB) => {
-            const author = db.users.find((u: User) => u.id === post.authorId);
-            const enrichedComments = (post.comments || []).map(c => {
-                const cAuthor = db.users.find(u => u.id === c.authorId);
-                return {
-                    ...c,
-                    author: cAuthor || { id: 0, username: "Гість", role: "student", profilePicUrl: "" }
-                };
-            });
+        const enrichedPosts: Post[] = rawPosts.map(post => {
+            const author = users.find(u => u.id === post.authorId);
+            const guestUser: User = {
+                id: 0,
+                username: "Гість",
+                role: "student",
+                profilePicUrl: ""
+            };
 
             return {
-                ...post,
-                author: author || { id: 0, username: "Гість", role: "student", profilePicUrl: "" },
-                comments: enrichedComments
+                id: post.id,
+                title: post.title,
+                content: post.content || [],
+                createdAt: post.createdAt || new Date().toLocaleString(),
+                author: author || guestUser,
+                comments: (post.comments || []).map(c => ({
+                    id: c.id || Date.now(),
+                    postid: post.id,
+                    text: c.text || "",
+                    createdAt: c.createdAt || new Date().toLocaleString(),
+                    author: users.find(u => u.id === c.authorId) || guestUser,
+                    replies: [] as ForumComment[]
+                }))
             };
         });
 
@@ -91,102 +107,95 @@ server.get('/api/posts', async (req: Request, res: Response) => {
         res.status(500).json({ error: "Помилка сервера" });
     }
 });
-
 server.get('/api/users/:id', async (req: Request, res: Response) => {
-    const userId = Number(req.params.id);
-    const db = await readDB();
+    try {
+        const userId = Number(req.params.id);
+        const userInfo = await UserModel.findOne({ id: userId }).lean();
 
-    const userPosts = db.posts.filter(p => p.authorId === userId);
-    const userInfo = db.users.find(u => u.id === userId);
+        if (!userInfo) return res.status(404).json({ message: "Користувача не знайдено" });
 
-    let commentCount = 0;
-    db.posts.forEach(p => {
-        const userComments = p.comments.filter(c => c.authorId === userId);
-        commentCount += userComments.length;
-    });
+        const allPosts = await PostModel.find().lean();
+        const userPosts = allPosts.filter(p => p.authorId === userId);
+        let commentCount = 0;
+        allPosts.forEach(p => {
+            commentCount += (p.comments || []).filter(c => c.authorId === userId).length;
+        });
 
-    res.json({
-        ...(userInfo || { username: 'Користувач', id: userId }),
-        stats: {
-            posts: userPosts.length,
-            comments: commentCount
-        }
-    });
+        res.json({
+            ...userInfo,
+            stats: { posts: userPosts.length, comments: commentCount }
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Помилка завантаження профілю" });
+    }
 });
 
-
 server.post('/api/posts/:id/comments', async (req: Request, res: Response) => {
-    const postId = Number(req.params.id);
-    const db = await readDB();
-    const postIndex = db.posts.findIndex(p => p.id === postId);
-
-    if (postIndex > -1) {
-        const newComment: ForumCommentDB = {
+    try {
+        const postId = Number(req.params.id);
+        const newComment = {
             id: Date.now(),
             text: req.body.text,
-            authorId: req.body.authorId || req.body.author?.id,
+            authorId: Number(req.body.authorId || req.body.author?.id),
             createdAt: new Date().toLocaleString()
         };
 
-        db.posts[postIndex].comments.push(newComment);
-        await writeDB(db);
+        const post = await PostModel.findOneAndUpdate(
+            { id: postId },
+            { $push: { comments: newComment } },
+            { new: true }
+        );
+
+        if (!post) return res.status(404).json({ message: 'Пост не знайдено' });
         res.status(201).json(newComment);
-    } else {
-        res.status(404).json({ message: 'Пост не знайдено' });
+    } catch (err) {
+        res.status(500).json({ error: "Помилка коментаря" });
     }
 });
-
 
 server.patch('/api/users/:id', async (req: Request, res: Response) => {
-    const targetId = Number(req.params.id);
-    const { profilePicUrl, username, requesterId } = req.body;
-    if (targetId !== Number(requesterId)) {
-        return res.status(403).json({ message: "Ви не можете редагувати чужий профіль!" });
-    }
-    let db = await readDB();
-    const userIndex = db.users.findIndex(u => u.id === targetId);
+    try {
+        const targetId = Number(req.params.id);
+        const { profilePicUrl, username, requesterId } = req.body;
 
-    if (userIndex !== -1) {
-        if (profilePicUrl) db.users[userIndex].profilePicUrl = profilePicUrl;
-        if (username) db.users[userIndex].username = username;
-        await writeDB(db);
-        res.json(db.users[userIndex]);
-    } else {
-        res.status(404).send('Користувача не знайдено');
+        if (targetId !== Number(requesterId)) {
+            return res.status(403).json({ message: "Доступ заборонено" });
+        }
+
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { id: targetId },
+            { $set: { profilePicUrl, username } },
+            { new: true }
+        );
+
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ error: "Помилка оновлення" });
     }
 });
-
 
 server.delete('/api/posts/:id', async (req: Request, res: Response) => {
-    const postId = Number(req.params.id);
-    let db = await readDB();
-
-    if (db.posts.some(p => p.id === postId)) {
-        db.posts = db.posts.filter(p => p.id !== postId);
-        await writeDB(db);
+    try {
+        await PostModel.deleteOne({ id: Number(req.params.id) });
         res.status(200).json({ message: 'Пост видалено' });
-    } else {
-        res.status(404).json({ message: 'Пост не знайдено' });
+    } catch (err) {
+        res.status(500).json({ error: "Помилка видалення" });
     }
 });
 
-
 server.delete('/api/posts/:postId/comments/:commentId', async (req: Request, res: Response) => {
-    const { postId, commentId } = req.params;
-    let db = await readDB();
-    const postIndex = db.posts.findIndex(p => p.id === Number(postId));
-
-    if (postIndex > -1) {
-        db.posts[postIndex].comments = db.posts[postIndex].comments.filter(
-            c => c.id !== Number(commentId)
+    try {
+        const { postId, commentId } = req.params;
+        await PostModel.findOneAndUpdate(
+            { id: Number(postId) },
+            { $pull: { comments: { id: Number(commentId) } } }
         );
-        await writeDB(db);
         res.status(200).json({ message: 'Коментар видалено' });
-    } else {
-        res.status(404).json({ message: 'Пост не знайдено' });
+    } catch (err) {
+        res.status(500).json({ error: "Помилка видалення коментаря" });
     }
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`🚀 API Server live on port ${PORT}`);
 });
