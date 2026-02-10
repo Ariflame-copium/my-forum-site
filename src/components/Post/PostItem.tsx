@@ -11,7 +11,7 @@ export const PostItem: React.FC<PostItemProp> = ({ post }) => {
             <S.Title>{post?.title} </S.Title>
             <S.AuthorInfo>
                 <Link to={`/profile/${post?.author?.id}`}>{post?.author?.username}</Link>
-                <span>{post?.author.role}</span>
+                <span>{post?.author?.role}</span>
                 <span>{post?.createdAt}</span>
             </S.AuthorInfo>
             <div style={{ marginTop: '10px' }}>
