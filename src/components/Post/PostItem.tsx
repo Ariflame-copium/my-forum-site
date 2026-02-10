@@ -10,7 +10,7 @@ export const PostItem: React.FC<PostItemProp> = ({ post }) => {
         <S.Card>
             <S.Title>{post?.title} </S.Title>
             <S.AuthorInfo>
-                <Link to={`/profile/${post?.author.id}`}>{post?.author.username}</Link>
+                <Link to={`/profile/${post?.author?.id}`}>{post?.author?.username}</Link>
                 <span>{post?.author.role}</span>
                 <span>{post?.createdAt}</span>
             </S.AuthorInfo>

@@ -6,6 +6,13 @@ interface PostProps {
   posts: Post[]
 }
 export const PostList: React.FC<PostProps> = ({ posts }) => {
+  if (!posts) {
+    return (
+      <S.ListWrapper>
+        <p>Завантаження постів</p>
+      </S.ListWrapper>
+    )
+  }
   return (
     <S.ListWrapper>
       {posts.length == 0 ? (
@@ -14,7 +21,7 @@ export const PostList: React.FC<PostProps> = ({ posts }) => {
         </S.EmptyState>
       ) : (
         posts.map((post) => (
-          <PostItem key={post.id} post={post}></PostItem>
+          <PostItem key={post?.id} post={post}></PostItem>
         ))
       )}
     </S.ListWrapper>
