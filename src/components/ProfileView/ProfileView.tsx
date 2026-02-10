@@ -129,8 +129,8 @@ export const ProfileView: React.FC = () => {
             </S.Info>
 
             <S.StatsGrid>
-                <S.StatCard><h3>Постів: {userData.stats.posts}</h3></S.StatCard>
-                <S.StatCard><h3>Коментарів: {userData.stats.comments}</h3></S.StatCard>
+                <S.StatCard><h3>Постів: {userData?.stats?.posts}</h3></S.StatCard>
+                <S.StatCard><h3>Коментарів: {userData?.stats?.comments}</h3></S.StatCard>
             </S.StatsGrid>
             {isMyProfile && (
                 <div style={{ marginTop: '20px', textAlign: 'center' }}>

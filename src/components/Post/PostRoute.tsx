@@ -70,18 +70,18 @@ export const PostRoute: React.FC<RouteProp> = ({ posts, userAuth, onAddComment, 
 
                             <div style={{ flex: 1 }}>
                                 <Link
-                                    to={`/profile/${comment.author.id}`}
+                                    to={`/profile/${comment?.author?.id}`}
                                     style={{ color: '#646cff', textDecoration: 'none', fontWeight: 'bold' }}
                                 >
-                                    {comment.author.username}
+                                    {comment?.author?.username}
                                 </Link>
-                                : {comment.text}
+                                : {comment?.text}
                             </div>
 
 
-                            {(userAuth?.role === 'admin' || userAuth?.username === comment.author.username) && (
+                            {(userAuth?.role === 'admin' || userAuth?.username === comment?.author.username) && (
                                 <button
-                                    onClick={() => onDeleteReply(post.id, comment.id)}
+                                    onClick={() => onDeleteReply(post?.id, comment?.id)}
                                     className="delete-comment-btn"
                                     style={{
                                         background: 'none',
@@ -98,7 +98,7 @@ export const PostRoute: React.FC<RouteProp> = ({ posts, userAuth, onAddComment, 
                     ))}
                 </div>
 
-                {userAuth && userAuth.role !== 'guest' ? (
+                {userAuth && userAuth?.role !== 'guest' ? (
                     <S.FormWrapper onSubmit={handleCommentSubmit}>
                         <textarea name="commentText" placeholder="Напишіть коментар..." required />
                         <button type="submit">Додати коментар</button>
@@ -109,7 +109,7 @@ export const PostRoute: React.FC<RouteProp> = ({ posts, userAuth, onAddComment, 
                     </S.EmptyState>
                 )}
 
-                {(userAuth?.role === 'admin' || userAuth?.username === post.author.username) && (
+                {(userAuth?.role === 'admin' || userAuth?.username === post?.author?.username) && (
                     <button
                         onClick={() => onDelete(post.id)}
                         className="delete-btn"

@@ -9,13 +9,13 @@ export const CommentItem: React.FC<CommentItemProp> = ({ comment }) => {
     return (
         <S.CommentContainer>
             <S.CommentHeader>
-                <S.AuthorName role={comment.author.role}>
-                    {comment.author.username}
-                    {comment.author.role === 'Topiccreator' && '(Автор)'}
+                <S.AuthorName role={comment?.author?.role}>
+                    {comment?.author?.username}
+                    {comment?.author?.role === 'Topiccreator' && '(Автор)'}
                 </S.AuthorName>
-                <S.DateText>{comment.createdAt}</S.DateText>
+                <S.DateText>{comment?.createdAt}</S.DateText>
             </S.CommentHeader>
-            <S.CommentContent>{comment.text}</S.CommentContent>
+            <S.CommentContent>{comment?.text}</S.CommentContent>
             <S.ReplyButton onClick={() => setReply(!reply)}>
                 {reply ? 'Скасувати' : 'Відповісти'}
             </S.ReplyButton>
@@ -32,8 +32,8 @@ export const CommentItem: React.FC<CommentItemProp> = ({ comment }) => {
                 </S.QuickReplyForm>
             )}
             <S.RepliesWrapper>
-                {comment.replies.map((reply) => (
-                    <CommentItem key={reply.id} comment={reply} />
+                {comment?.replies.map((reply) => (
+                    <CommentItem key={reply?.id} comment={reply} />
                 ))}
             </S.RepliesWrapper>
         </S.CommentContainer>
