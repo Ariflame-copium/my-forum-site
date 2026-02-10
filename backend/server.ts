@@ -50,7 +50,9 @@ async function readDB(): Promise<DBStructure> {
 }
 
 async function writeDB(db: DBStructure): Promise<void> {
+    console.log("Спроба запису в БД за шляхом:", DB_PATH);
     await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
+    console.log("Дані успішно збережено!");
 }
 
 server.use(express.json({
