@@ -200,6 +200,22 @@ server.post('/api/register', async (req: Request, res: Response) => {
     }
 });
 
+server.post('/api/login', async (req: Request, res: Response) => {
+    try {
+        const { email, password } = req.body;
+        const user = await UserModel.findOne({ email, password }).lean();
+
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(401).json({ message: "Невірний email або пароль" });
+        }
+    } catch (err) {
+        console.error("Помилка логіну:", err);
+        res.status(500).json({ error: "Помилка сервера при вході" });
+    }
+});
+
 server.delete('/api/posts/:id', async (req: Request, res: Response) => {
     try {
         await PostModel.deleteOne({ id: Number(req.params.id) });
