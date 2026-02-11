@@ -7,12 +7,23 @@ export const usePosts = () => {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
         fetch(`${API_URL}/api/posts`)
-            .then(res => res.json())
-            .then(data => {
-                setPosts(data);
-                setIsLoading(false);
+            .then(res => {
+                if (!res.ok) throw new Error(`Server error: ${res.status}`);
+                return res.json();
             })
-            .catch(err => console.error("Помилка загрузки:", err));
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setPosts(data);
+                } else {
+                    console.error("Отримано не масив:", data);
+                    setPosts([]);
+                }
+            })
+            .catch(err => {
+                console.error("Помилка загрузки:", err);
+                setPosts([]);
+            })
+            .finally(() => setIsLoading(false));
     }, []);
 
     const addPost = async (newPost: Omit<Post, 'id' | 'createdAt' | 'comments'>) => {
