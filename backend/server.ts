@@ -152,7 +152,7 @@ server.post('/api/posts/:id/comments', async (req: Request, res: Response) => {
 server.post('/api/posts', async (req: Request, res: Response) => {
     try {
         const { title, content, authorId, author } = req.body;
-        const finalAuthorID = authorId || author
+        const finalAuthorID = authorId || (author && author.id);
         if (!finalAuthorID) {
             return res.status(404).json({ error: "Invalid ID!" })
         }
