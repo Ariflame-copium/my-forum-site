@@ -176,20 +176,27 @@ server.patch('/api/users/:id', async (req: Request, res: Response) => {
 
 server.post('/api/register', async (req: Request, res: Response) => {
     try {
-        const { username, password, profilePicUrl, role } = req.body;
+        const { username, email, password, profilePicUrl, role } = req.body;
+        if (!email || !password || !username) {
+            return res.status(400).json({ error: "Відсутні обов'язкові поля: email, password або username" });
+        }
 
         const newUser = new UserModel({
             id: Date.now(),
             username,
+            email,
             password,
             profilePicUrl: profilePicUrl || "",
             role: role || 'student'
         });
-
         await newUser.save();
         res.status(201).json(newUser);
-    } catch (err) {
-        res.status(500).json({ error: "Помилка реєстрації" });
+    } catch (err: any) {
+        console.error("Помилка БД:", err);
+        if (err.code === 11000) {
+            return res.status(400).json({ error: "Користувач з таким email вже існує" });
+        }
+        res.status(500).json({ error: "Помилка реєстрації на сервері" });
     }
 });
 
