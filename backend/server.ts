@@ -149,6 +149,24 @@ server.post('/api/posts/:id/comments', async (req: Request, res: Response) => {
         res.status(500).json({ error: "Помилка коментаря" });
     }
 });
+server.post('/api/posts', async (req: Request, res: Response) => {
+    try {
+        const { title, content, authorId } = req.body
+        const newPost = new PostModel({
+            id: Date.now(),
+            title,
+            content: Array.isArray(content) ? content : [content],
+            authorId: Number(authorId),
+            createdAt: new Date().toLocaleDateString('uk-UA'),
+            comments: [] as ForumComment[]
+        })
+        await newPost.save()
+        res.status(201).json(newPost)
+    } catch (err) {
+        console.error("Помилка створення поста", err)
+        res.status(500).json({ error: "Не вдалося зберегти пост" })
+    }
+})
 
 server.patch('/api/users/:id', async (req: Request, res: Response) => {
     try {
