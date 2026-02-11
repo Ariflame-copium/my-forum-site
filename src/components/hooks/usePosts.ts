@@ -27,6 +27,7 @@ export const usePosts = () => {
     }, []);
 
     const addPost = async (newPost: Omit<Post, 'id' | 'createdAt' | 'comments'>) => {
+        console.log("ДАНІ ДЛЯ ВІДПРАВКИ:", newPost);
         try {
             const response = await fetch(`${API_URL}/api/posts`, {
                 method: 'POST',

@@ -128,7 +128,6 @@ server.get('/api/users/:id', async (req: Request, res: Response) => {
 });
 
 server.post('/api/posts/:id/comments', async (req: Request, res: Response) => {
-    console.log("ДАНІ ДЛЯ ВІДПРАВКИ:", newPost);
     try {
         const postId = Number(req.params.id);
         const newComment = {
