@@ -151,12 +151,16 @@ server.post('/api/posts/:id/comments', async (req: Request, res: Response) => {
 });
 server.post('/api/posts', async (req: Request, res: Response) => {
     try {
-        const { title, content, authorId } = req.body
+        const { title, content, authorId, author } = req.body;
+        const finalAuthorID = authorId || author
+        if (!finalAuthorID) {
+            return res.status(404).json({ error: "Invalid ID!" })
+        }
         const newPost = new PostModel({
             id: Date.now(),
             title,
             content: Array.isArray(content) ? content : [content],
-            authorId: Number(authorId),
+            authorId: Number(finalAuthorID),
             createdAt: new Date().toLocaleDateString('uk-UA'),
             comments: [] as ForumComment[]
         })
