@@ -31,19 +31,28 @@ export const useAppLogic = () => {
         setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
     const protectedPost = (newPost: Post) => {
-        if (!userAuth || userAuth.role == 'guest') {
-            openLogin()
-            return
+        if (!userAuth || userAuth.role === 'guest' || !userAuth.id) {
+            openLogin();
+            return;
         }
-        originalAddPost(newPost)
-    }
+        originalAddPost(newPost);
+    };
     useEffect(() => {
-        const savedSession = localStorage.getItem('current_session');
-        if (savedSession) {
-            setUserauth(JSON.parse(savedSession));
+        try {
+            const savedSession = localStorage.getItem('current_session');
+            if (savedSession) {
+                const parsedUser = JSON.parse(savedSession);
+                if (parsedUser.id && String(parsedUser.id).length < 10 && parsedUser.id !== 0) {
+                    localStorage.removeItem('current_session');
+                    return;
+                }
+                setUserauth(parsedUser);
+            }
+        } catch (err) {
+            console.error("Помилка відновлення сесії:", err);
+            localStorage.removeItem('current_session');
         }
     }, []);
-
     const currentUser: User = userAuth || {
         username: 'Гість',
         id: 0,

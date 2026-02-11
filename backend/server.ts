@@ -174,6 +174,25 @@ server.patch('/api/users/:id', async (req: Request, res: Response) => {
     }
 });
 
+server.post('/api/register', async (req: Request, res: Response) => {
+    try {
+        const { username, password, profilePicUrl, role } = req.body;
+
+        const newUser = new UserModel({
+            id: Date.now(),
+            username,
+            password,
+            profilePicUrl: profilePicUrl || "",
+            role: role || 'student'
+        });
+
+        await newUser.save();
+        res.status(201).json(newUser);
+    } catch (err) {
+        res.status(500).json({ error: "Помилка реєстрації" });
+    }
+});
+
 server.delete('/api/posts/:id', async (req: Request, res: Response) => {
     try {
         await PostModel.deleteOne({ id: Number(req.params.id) });
