@@ -21,13 +21,24 @@ export const ProfileView: React.FC = () => {
     const [editAvatar, setEditAvatar] = useState('');
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
+        if (!userId) return;
+
+        setLoading(true);
         fetch(`${API_URL}/api/users/${userId}`)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Користувача не знайдено або помилка сервера');
+                }
+                return res.json();
+            })
             .then(data => {
                 setUserData(data);
-                setLoading(false);
             })
-            .catch(err => console.error('Помилка:', err));
+            .catch(err => {
+                console.error('Помилка профілю:', err);
+                setUserData(null);
+            })
+            .finally(() => setLoading(false));
     }, [userId]);
     const compressImage = (base64Str: string): Promise<string> => {
         return new Promise((resolve) => {
