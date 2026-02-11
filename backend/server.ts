@@ -72,31 +72,27 @@ const PostModel = mongoose.model('Post', PostSchema);
 server.get('/api/posts', async (req: Request, res: Response) => {
     try {
         const [rawPosts, users] = await Promise.all([
-            PostModel.find().lean(),
+            PostModel.find().sort({ _id: -1 }).lean(),
             UserModel.find().lean()
         ]);
 
-        const enrichedPosts: Post[] = rawPosts.map(post => {
-            const author = users.find(u => u.id === post.authorId);
-            const guestUser: User = {
-                id: 0,
-                username: "Гість",
-                role: "student",
-                profilePicUrl: ""
-            };
+        const guestUser: User = {
+            id: 0,
+            username: "Гість",
+            role: "student",
+            profilePicUrl: ""
+        };
+
+        const enrichedPosts = rawPosts.map(post => {
+            const author = users.find(u => Number(u.id) === Number(post.authorId));
 
             return {
-                id: post.id,
-                title: post.title,
-                content: post.content || [],
-                createdAt: post.createdAt || new Date().toLocaleString(),
+                ...post,
+                id: post.id || post._id,
                 author: author || guestUser,
                 comments: (post.comments || []).map(c => ({
-                    id: c.id || Date.now(),
-                    postid: post.id,
-                    text: c.text || "",
-                    createdAt: c.createdAt || new Date().toLocaleString(),
-                    author: users.find(u => u.id === c.authorId) || guestUser,
+                    ...c,
+                    author: users.find(u => Number(u.id) === Number(c.authorId)) || guestUser,
                     replies: [] as ForumComment[]
                 }))
             };
@@ -104,7 +100,8 @@ server.get('/api/posts', async (req: Request, res: Response) => {
 
         res.json(enrichedPosts);
     } catch (err) {
-        res.status(500).json({ error: "Помилка сервера" });
+        console.error("Помилка завантаження стрічки:", err);
+        res.status(500).json({ error: "Не вдалося завантажити пости" });
     }
 });
 server.get('/api/users/:id', async (req: Request, res: Response) => {
