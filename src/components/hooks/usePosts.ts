@@ -33,10 +33,16 @@ export const usePosts = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newPost)
             });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Сервер повернув помилку:", errorText);
+                return;
+            }
             const savedPost = await response.json();
             setPosts(prev => [savedPost, ...prev]);
+
         } catch (err) {
-            console.error("Не вдалося викласти пост:", err);
+            console.error("Критична помилка запиту:", err);
         }
     };
 
