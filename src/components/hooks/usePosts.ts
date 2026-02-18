@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { Post } from "../types";
+import { type Post } from "../types";
 import type { ForumComment } from "../types";
 import { useAppLogic } from "./useAppLogic";
 export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'createdAt'> & {
@@ -8,7 +8,7 @@ export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'creat
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { state } = useAppLogic()
+    const { currentUser } = useAppLogic()
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
         fetch(`${API_URL}/api/posts`)
@@ -36,20 +36,17 @@ export const usePosts = () => {
             const response = await fetch(`${API_URL}/api/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newPostData) // Шлемо { title, content, authorId }
+                body: JSON.stringify(newPostData)
             });
 
             const savedPostFromServer = await response.json();
 
-            // Тепер головна магія:
-            // Сервер повернув пост, де є id та authorId.
-            // Але наш стейт `posts` очікує об'єкт з `author: User`.
+
             const postForUI: Post = {
                 ...savedPostFromServer,
-                author: state.userAuth // Додаємо автора зі стейту фронтенда вручну
+                author: currentUser
             };
 
-            // Оновлюємо UI
             setPosts(prev => [postForUI, ...prev]);
 
         } catch (err) {
