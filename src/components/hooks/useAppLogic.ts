@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { usePosts } from './usePosts';
 import type { User } from '../types';
 import type { CreatePostPayload } from './usePosts';
@@ -30,13 +30,13 @@ export const useAppLogic = () => {
     const toggleTheme = () => {
         setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
-    const protectedPost = (newPost: CreatePostPayload) => {
+    const protectedPost = useCallback((newPost: CreatePostPayload) => {
         if (!userAuth || userAuth.role === 'guest' || !userAuth.id) {
             openLogin();
             return;
         }
         originalAddPost(newPost);
-    };
+    }, [userAuth, originalAddPost]);
     useEffect(() => {
         try {
             const savedSession = localStorage.getItem('current_session');
@@ -59,23 +59,24 @@ export const useAppLogic = () => {
         role: 'guest',
         profilePicUrl: ''
     };
-
-    return {
-        state: { visible, isAuthModalOpen, userAuth, theme, modalMode, posts },
-        actions: {
-            setVisible,
-            setAuthModalOpen,
-            toggleSider,
-            openLogin,
-            openRegister,
-            handleAuth,
-            toggleTheme,
-            addPost: protectedPost,
-            addComment,
-            allComment,
-            deleteComment,
-            deleteReply
-        },
-        currentUser
-    };
+    return useMemo(() => {
+        return {
+            state: { visible, isAuthModalOpen, userAuth, theme, modalMode, posts },
+            actions: {
+                setVisible,
+                setAuthModalOpen,
+                toggleSider,
+                openLogin,
+                openRegister,
+                handleAuth,
+                toggleTheme,
+                addPost: protectedPost,
+                addComment,
+                allComment,
+                deleteComment,
+                deleteReply
+            },
+            currentUser
+        };
+    }, [visible, isAuthModalOpen, userAuth, theme, modalMode, posts, protectedPost, currentUser]);
 };
