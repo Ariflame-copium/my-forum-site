@@ -105,5 +105,5 @@ export const usePosts = () => {
         }
     };
 
-    return { posts, addPost, addComment, isLoading, allComment, deleteComment, deleteReply };
+    return { posts, addPost, addComment, isLoading, allComment, deleteComment, deleteReply, setPosts };
 };
