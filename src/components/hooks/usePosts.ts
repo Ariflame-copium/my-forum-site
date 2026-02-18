@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import type { Post } from "../types";
 import type { ForumComment } from "../types";
+import { useAppLogic } from "./useAppLogic";
+export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'createdAt'> & {
+    authorId: number;
+};
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { state } = useAppLogic()
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
         fetch(`${API_URL}/api/posts`)
@@ -26,24 +31,29 @@ export const usePosts = () => {
             .finally(() => setIsLoading(false));
     }, []);
 
-    const addPost = async (newPost: Omit<Post, 'id' | 'createdAt' | 'comments'>) => {
-        console.log("ДАНІ ДЛЯ ВІДПРАВКИ:", newPost);
+    const addPost = async (newPostData: CreatePostPayload) => {
         try {
             const response = await fetch(`${API_URL}/api/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newPost)
+                body: JSON.stringify(newPostData) // Шлемо { title, content, authorId }
             });
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Сервер повернув помилку:", errorText);
-                return;
-            }
-            const savedPost = await response.json();
-            setPosts(prev => [savedPost, ...prev]);
+
+            const savedPostFromServer = await response.json();
+
+            // Тепер головна магія:
+            // Сервер повернув пост, де є id та authorId.
+            // Але наш стейт `posts` очікує об'єкт з `author: User`.
+            const postForUI: Post = {
+                ...savedPostFromServer,
+                author: state.userAuth // Додаємо автора зі стейту фронтенда вручну
+            };
+
+            // Оновлюємо UI
+            setPosts(prev => [postForUI, ...prev]);
 
         } catch (err) {
-            console.error("Критична помилка запиту:", err);
+            console.error("Помилка:", err);
         }
     };
 

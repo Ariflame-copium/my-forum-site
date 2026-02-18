@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { usePosts } from './usePosts';
 import type { User } from '../types';
-import type { Post } from '../types';
+import type { CreatePostPayload } from './usePosts';
 export const useAppLogic = () => {
     const [visible, setVisible] = useState(false);
     const [isAuthModalOpen, setAuthModalOpen] = useState(false);
@@ -30,7 +30,7 @@ export const useAppLogic = () => {
     const toggleTheme = () => {
         setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
-    const protectedPost = (newPost: Post) => {
+    const protectedPost = (newPost: CreatePostPayload) => {
         if (!userAuth || userAuth.role === 'guest' || !userAuth.id) {
             openLogin();
             return;

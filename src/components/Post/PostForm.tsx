@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import type { Post, User } from "../types";
+import type { User } from "../types";
 import { Modal } from "../Modal";
+import type { CreatePostPayload } from "../hooks/usePosts";
 import * as S from '../styled'
 interface PostFormProps {
-    onAddPost: (newPost: Post) => void;
+    onAddPost: (newPost: CreatePostPayload) => void;
     currentUser: User;
-    OnAuthSuccess: (user: User) => void
+    OnAuthSuccess: (user: User) => void;
 }
 
 export const PostForm: React.FC<PostFormProps> = ({ onAddPost, currentUser, OnAuthSuccess }) => {
@@ -24,16 +25,13 @@ export const PostForm: React.FC<PostFormProps> = ({ onAddPost, currentUser, OnAu
             return
         }
 
-        const newPost: Post = {
-            id: Date.now(),
+        const payload = {
             title: title,
-            author: currentUser,
             content: content.split('\n').filter((p: string) => p.trim() !== ''),
-            createdAt: Date.now().toLocaleString(),
-            comments: []
+            authorId: currentUser.id // Передаємо тільки ID, як того чекає сервер
         };
 
-        onAddPost(newPost);
+        onAddPost(payload);
         setTitle('');
         setContent('');
     };
