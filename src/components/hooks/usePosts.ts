@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Post, User } from "../types";
 import type { ForumComment } from "../types";
+import { useAppLogic } from "./useAppLogic";
 export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'createdAt'> & {
     title: string;
     content: string[];
@@ -11,6 +12,7 @@ export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const { currentUser } = useAppLogic()
     useEffect(() => {
         fetch(`${API_URL}/api/posts`)
             .then(res => {
@@ -94,9 +96,13 @@ export const usePosts = () => {
                 body: JSON.stringify(comment)
             });
             const savedComment = await response.json();
+            const commentUI = {
+                ...savedComment,
+                author: currentUser
+            }
             setPosts(prev => prev.map(post =>
                 post.id === postId
-                    ? { ...post, comments: [...(post.comments || []), savedComment] }
+                    ? { ...post, comments: [...(post.comments || []), commentUI] }
                     : post
             ));
         } catch (err) {
