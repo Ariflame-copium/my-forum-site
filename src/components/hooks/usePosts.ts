@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Post, User } from "../types";
 import type { ForumComment } from "../types";
-import { useAppLogic } from "./useAppLogic";
 export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'createdAt'> & {
     title: string;
     content: string[];
@@ -11,7 +10,6 @@ export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'creat
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const { currentUser } = useAppLogic()
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
         fetch(`${API_URL}/api/posts`)
@@ -39,21 +37,22 @@ export const usePosts = () => {
             const response = await fetch(`${API_URL}/api/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    title: payload.title,
+                    content: payload.content,
+                    authorId: payload.authorId
+                })
             });
 
             const savedPostFromServer = await response.json();
-
-
             const postForUI: Post = {
                 ...savedPostFromServer,
-                author: currentUser
+                author: payload.author
             };
 
             setPosts(prev => [postForUI, ...prev]);
-
         } catch (err) {
-            console.error("Помилка:", err);
+            console.error("Помилка при додаванні:", err);
         }
     };
 

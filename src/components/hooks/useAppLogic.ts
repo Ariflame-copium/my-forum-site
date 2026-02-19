@@ -34,12 +34,18 @@ export const useAppLogic = () => {
     }, []);
 
 
-    const protectedPost = useCallback((newPost: CreatePostPayload) => {
-        if (!userAuth || userAuth.role === 'guest' || !userAuth.id) {
+    const protectedPost = useCallback((postData: Omit<CreatePostPayload, 'author' | 'authorId'>) => {
+        if (!userAuth || userAuth.role === 'guest') {
             openLogin();
             return;
         }
-        originalAddPost(newPost);
+        const fullPayload: CreatePostPayload = {
+            ...postData,
+            authorId: userAuth.id,
+            author: userAuth
+        };
+
+        originalAddPost(fullPayload);
     }, [userAuth, openLogin, originalAddPost]);
 
     useEffect(() => {
