@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { type Post } from "../types";
+import type { Post, User } from "../types";
 import type { ForumComment } from "../types";
 import { useAppLogic } from "./useAppLogic";
 export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'createdAt'> & {
+    title: string;
+    content: string[];
     authorId: number;
+    author: User;
 };
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
@@ -31,12 +34,12 @@ export const usePosts = () => {
             .finally(() => setIsLoading(false));
     }, []);
 
-    const addPost = async (newPostData: CreatePostPayload) => {
+    const addPost = async (payload: CreatePostPayload) => {
         try {
             const response = await fetch(`${API_URL}/api/posts`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newPostData)
+                body: JSON.stringify(payload)
             });
 
             const savedPostFromServer = await response.json();

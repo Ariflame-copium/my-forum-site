@@ -28,7 +28,8 @@ export const PostForm: React.FC<PostFormProps> = ({ onAddPost, currentUser, OnAu
         const payload = {
             title: title,
             content: content.split('\n').filter((p: string) => p.trim() !== ''),
-            authorId: currentUser.id // Передаємо тільки ID, як того чекає сервер
+            authorId: currentUser.id,
+            author: currentUser
         };
 
         onAddPost(payload);
