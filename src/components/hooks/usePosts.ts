@@ -1,18 +1,22 @@
 import { useState, useEffect } from "react";
 import type { Post, User } from "../types";
 import type { ForumComment } from "../types";
-import { useAppLogic } from "./useAppLogic";
 export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'createdAt'> & {
     title: string;
     content: string[];
     authorId: number;
     author: User;
 };
+type createCommentPayload = Omit<ForumComment, 'id' | 'author' | 'createdAt'> & {
+    text: string;
+    replies: string[];
+    authorId: number;
+    author: User;
+}
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-    const { currentUser } = useAppLogic()
     useEffect(() => {
         fetch(`${API_URL}/api/posts`)
             .then(res => {
@@ -88,17 +92,22 @@ export const usePosts = () => {
             console.log('Помилка при видаленні', err)
         }
     }
-    const addComment = async (postId: number, comment: Omit<ForumComment, 'id' | 'createdAt'>) => {
+    const addComment = async (postId: number, payload: createCommentPayload) => {
         try {
             const response = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(comment)
+                body: JSON.stringify({
+                    text: payload.text,
+                    replies: payload.replies,
+                    authorId: payload.authorId,
+                    author: payload.author
+                })
             });
             const savedComment = await response.json();
             const commentUI = {
                 ...savedComment,
-                author: currentUser
+                author: payload.author
             }
             setPosts(prev => prev.map(post =>
                 post.id === postId
