@@ -72,8 +72,7 @@ export const AppSection: React.FC = () => {
                                         actions.addComment(postId, {
                                             text: text,
                                             author: state.userAuth || currentUser,
-                                            postid: postId,
-                                            replies: []
+                                            authorId: state.userAuth?.id!
                                         });
                                     }}
                                 />

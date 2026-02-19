@@ -7,9 +7,8 @@ export type CreatePostPayload = Omit<Post, 'id' | 'author' | 'comments' | 'creat
     authorId: number;
     author: User;
 };
-type createCommentPayload = Omit<ForumComment, 'id' | 'author' | 'createdAt'> & {
+export interface CreateCommentPayload {
     text: string;
-    replies: string[];
     authorId: number;
     author: User;
 }
@@ -92,23 +91,26 @@ export const usePosts = () => {
             console.log('Помилка при видаленні', err)
         }
     }
-    const addComment = async (postId: number, payload: createCommentPayload) => {
+    const addComment = async (postId: number, payload: CreateCommentPayload) => {
         try {
             const response = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     text: payload.text,
-                    replies: payload.replies,
-                    authorId: payload.authorId,
-                    author: payload.author
+                    authorId: payload.authorId
                 })
             });
+
+            if (!response.ok) throw new Error('Failed to save comment');
             const savedComment = await response.json();
-            const commentUI = {
+            const commentUI: ForumComment = {
                 ...savedComment,
-                author: payload.author
-            }
+                postid: postId,
+                author: payload.author,
+                replies: []
+            };
+
             setPosts(prev => prev.map(post =>
                 post.id === postId
                     ? { ...post, comments: [...(post.comments || []), commentUI] }
@@ -118,6 +120,5 @@ export const usePosts = () => {
             console.error("Помилка при спробі додати коментар:", err);
         }
     };
-
     return { posts, addPost, addComment, isLoading, allComment, deleteComment, deleteReply, setPosts };
 };
