@@ -79,7 +79,7 @@ export const PostRoute: React.FC<RouteProp> = ({ posts, userAuth, onAddComment, 
                             </div>
 
 
-                            {(userAuth?.role === 'admin' || userAuth?.username === comment?.author.username) && (
+                            {(userAuth?.role === 'admin' || userAuth?.username === comment?.author?.username) && (
                                 <button
                                     onClick={() => onDeleteReply(post?.id, comment?.id)}
                                     className="delete-comment-btn"
