@@ -22,8 +22,8 @@ export const MessagesView: React.FC<messagesProp> = ({ posts, allcomments, curre
 
             {commentView.length > 0 ? (
                 commentView.map(comment => {
+                    console.log('Коментар:', comment)
                     const parentPost = posts.find(p => p.id === comment.postid);
-
                     return (
                         <S.Card key={comment?.id} style={{ marginBottom: '15px' }}>
                             <Link to={`/post/${comment?.postid}`} style={{ textDecoration: 'none', color: 'inherit' }}>
