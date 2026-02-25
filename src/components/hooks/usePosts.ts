@@ -61,7 +61,12 @@ export const usePosts = () => {
         }
     };
 
-    const allComment = posts.flatMap(p => p.comments || []);
+    const allComment = posts.flatMap(post =>
+        (post.comments || []).map(comment => ({
+            ...comment,
+            postid: post.id
+        }))
+    );
     const deleteReply = async (postId: number, commentId: number) => {
         const response = await fetch(`${API_URL}/api/posts/${postId}/comments/${commentId}`, {
             method: 'DELETE'
