@@ -12,7 +12,6 @@ export const MessagesView: React.FC<messagesProp> = ({ posts, allcomments, curre
     const currentUsername = currentUser?.username
     const commentView = allcomments.filter(c => c.author.username === currentUsername)
     const [searchTerm, setSearchTerm] = useState("")
-    const [load, setLoad] = useState(false)
     const filteredComments = commentView.filter(comment => comment.text.toLowerCase().includes(searchTerm.toLowerCase()))
 
     return (
@@ -24,48 +23,43 @@ export const MessagesView: React.FC<messagesProp> = ({ posts, allcomments, curre
             </S.BackLink>
 
             <S.PostTitle>Ваша активність</S.PostTitle>
+            <>
 
-            {load ? (
-                <p>Завантаження...</p>
-            ) : (
-                <>
+                {commentView.length > 0 && (
+                    <input
+                        type="text"
+                        placeholder="Пошук у коментарях..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ marginBottom: '20px', padding: '8px', width: '100%' }}
+                    />
+                )}
 
-                    {commentView.length > 0 && (
-                        <input
-                            type="text"
-                            placeholder="Пошук у коментарях..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ marginBottom: '20px', padding: '8px', width: '100%' }}
-                        />
-                    )}
-
-                    {filteredComments.length > 0 ? (
-                        filteredComments.map(comment => {
-                            const parentPost = posts.find(p => p.id === comment.postid);
-                            return (
-                                <S.Card key={comment?.id} style={{ marginBottom: '15px' }}>
-                                    <Link to={`/post/${comment?.postid}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                        <div style={{ fontSize: '0.85rem', color: '#646cff', marginBottom: '5px' }}>
-                                            Пост: {parentPost?.title || "Видалений пост"}
-                                        </div>
-                                        <p style={{ margin: '0', opacity: 0.9 }}>
-                                            <strong>Ви:</strong> {comment.text}
-                                        </p>
-                                        <div style={{ fontSize: '0.75rem', opacity: 0.5, marginTop: '8px' }}>
-                                            {comment.createdAt}
-                                        </div>
-                                    </Link>
-                                </S.Card>
-                            );
-                        })
-                    ) : (
-                        <S.EmptyState>
-                            <p>{searchTerm ? "Нічого не знайдено за вашим запитом" : "Ви ще не залишили жодного коментаря"}</p>
-                        </S.EmptyState>
-                    )}
-                </>
-            )}
+                {filteredComments.length > 0 ? (
+                    filteredComments.map(comment => {
+                        const parentPost = posts.find(p => p.id === comment.postid);
+                        return (
+                            <S.Card key={comment?.id} style={{ marginBottom: '15px' }}>
+                                <Link to={`/post/${comment?.postid}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                    <div style={{ fontSize: '0.85rem', color: '#646cff', marginBottom: '5px' }}>
+                                        Пост: {parentPost?.title || "Видалений пост"}
+                                    </div>
+                                    <p style={{ margin: '0', opacity: 0.9 }}>
+                                        <strong>Ви:</strong> {comment.text}
+                                    </p>
+                                    <div style={{ fontSize: '0.75rem', opacity: 0.5, marginTop: '8px' }}>
+                                        {comment.createdAt}
+                                    </div>
+                                </Link>
+                            </S.Card>
+                        );
+                    })
+                ) : (
+                    <S.EmptyState>
+                        <p>{searchTerm ? "Нічого не знайдено за вашим запитом" : "Ви ще не залишили жодного коментаря"}</p>
+                    </S.EmptyState>
+                )}
+            </>
         </S.PostWrapper>
     );
 };
