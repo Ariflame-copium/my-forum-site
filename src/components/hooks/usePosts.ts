@@ -17,26 +17,24 @@ export const usePosts = () => {
     const [isLoading, setIsLoading] = useState(true);
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     useEffect(() => {
-        fetch(`${API_URL}/api/posts`)
-            .then(res => {
-                if (!res.ok) throw new Error(`Server error: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                if (Array.isArray(data)) {
-                    setPosts(data);
-                } else {
-                    console.error("Отримано не масив:", data);
-                    setPosts([]);
-                }
-            })
-            .catch(err => {
-                console.error("Помилка загрузки:", err);
-                setPosts([]);
-            })
-            .finally(() => setIsLoading(false));
-    }, []);
-
+        const fetchPosts = () => {
+            fetch(`${API_URL}/api/posts`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`Server error: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setPosts(data);
+                    }
+                })
+                .catch(err => console.error("Помилка фонового оновлення:", err))
+                .finally(() => setIsLoading(false));
+        };
+        fetchPosts();
+        const interval = setInterval(fetchPosts, 10000);
+        return () => clearInterval(interval);
+    }, [])
     const addPost = async (payload: CreatePostPayload) => {
         try {
             const response = await fetch(`${API_URL}/api/posts`, {
