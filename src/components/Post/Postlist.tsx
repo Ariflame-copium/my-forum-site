@@ -1,11 +1,17 @@
 import React from "react";
-import type { Post } from "../types";
+import type { Post, User } from "../types";
 import { PostItem } from "./PostItem";
 import * as S from '../styled'
+import { useState } from "react";
 interface PostProps {
-  posts: Post[]
+  posts: Post[],
+  currentUser: User | null
 }
-export const PostList: React.FC<PostProps> = ({ posts }) => {
+export const PostList: React.FC<PostProps> = ({ posts, currentUser }) => {
+  const [searchTerm, setSearchTerm] = useState("")
+  const currentUsername = currentUser?.username
+  const findPost = posts.filter(p => p.author.username === currentUsername)
+  const filteredPost = findPost.filter(posts => posts.title.toLowerCase().includes(searchTerm.toLowerCase()))
   if (!posts) {
     return (
       <S.ListWrapper>
@@ -15,12 +21,19 @@ export const PostList: React.FC<PostProps> = ({ posts }) => {
   }
   return (
     <S.ListWrapper>
-      {posts.length == 0 ? (
+      {findPost.length > 0 && (
+        <input type="text"
+          placeholder="Пошук посту"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ marginBottom: '20px', padding: '8px', width: '100%' }} />
+      )}
+      {filteredPost.length == 0 ? (
         <S.EmptyState>
           <p>Постів поки нема. Будь першим!</p>
         </S.EmptyState>
       ) : (
-        posts.map((post) => (
+        filteredPost.map((post) => (
           <PostItem key={post?.id} post={post}></PostItem>
         ))
       )}

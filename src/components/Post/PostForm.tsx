@@ -50,7 +50,7 @@ export const PostForm: React.FC<PostFormProps> = ({ onAddPost, currentUser, OnAu
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        placeholder="Що у вас нового?"
+                        placeholder="Текст посту"
                     />
                     <button type="submit">Опубликовать</button>
                 </S.FormWrapper>
