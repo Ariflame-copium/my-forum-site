@@ -33,7 +33,11 @@ export interface Post {
 const server = express();
 const PORT = Number(process.env.PORT) || 5000;
 
-server.use(cors());
+server.use(cors({
+    origin: 'https://my-forum-site.vercel.app',
+    methods: ['GET', 'POST', 'DELETE'],
+    credentials: true
+}));
 server.use(express.json({ limit: '50mb' }));
 server.use(express.urlencoded({ limit: '50mb', extended: true }));
 
