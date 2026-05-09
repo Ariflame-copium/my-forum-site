@@ -15,7 +15,7 @@ export interface CreateCommentPayload {
 export const usePosts = () => {
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://my-forum-site.onrender.com';
     useEffect(() => {
         const fetchPosts = () => {
             fetch(`${API_URL}/api/posts`)
@@ -57,6 +57,7 @@ export const usePosts = () => {
         } catch (err) {
             console.error("Помилка при додаванні:", err);
         }
+        console.log("Данные из API:", payload)
     };
 
     const allComment = posts.flatMap(post =>
