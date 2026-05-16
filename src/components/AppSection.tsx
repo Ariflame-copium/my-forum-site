@@ -50,7 +50,7 @@ export const AppSection: React.FC = () => {
                                     <S.AuthPrompt onClick={actions.openLogin}>Увійдіть, щоб писати</S.AuthPrompt>
                                 )}
                                 <PostList posts={state.posts}
-                                    currentUser={state.userAuth || currentUser} />
+                                />
                             </>
                         } />
                         <Route path="/profile/:userId" element={<ProfileView />} />

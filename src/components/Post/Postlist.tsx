@@ -1,11 +1,10 @@
 import React from "react";
-import type { Post, User } from "../types";
+import type { Post } from "../types";
 import { PostItem } from "./PostItem";
 import * as S from '../styled'
 import { useState } from "react";
 interface PostProps {
   posts: Post[],
-  user: User;
 }
 export const PostList: React.FC<PostProps> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState("")
