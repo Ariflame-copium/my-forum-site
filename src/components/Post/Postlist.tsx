@@ -5,13 +5,11 @@ import * as S from '../styled'
 import { useState } from "react";
 interface PostProps {
   posts: Post[],
-  currentUser: User | null
+  user: User;
 }
-export const PostList: React.FC<PostProps> = ({ posts, currentUser }) => {
+export const PostList: React.FC<PostProps> = ({ posts }) => {
   const [searchTerm, setSearchTerm] = useState("")
-  const currentUsername = currentUser?.username
-  const findPost = posts.filter(p => p.author.username === currentUsername)
-  const filteredPost = findPost.filter(posts => posts.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredPost = posts.filter(posts => posts.title.toLowerCase().includes(searchTerm.toLowerCase()))
   if (!posts) {
     return (
       <S.ListWrapper>
@@ -21,7 +19,7 @@ export const PostList: React.FC<PostProps> = ({ posts, currentUser }) => {
   }
   return (
     <S.ListWrapper>
-      {findPost.length > 0 && (
+      {filteredPost.length > 0 && (
         <input type="text"
           placeholder="Пошук посту"
           value={searchTerm}
